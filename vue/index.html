@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- 开发环境版本 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!-- 导入axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<div id="app">
+    <h2>hello</h2>
+    {{ message }}<br/>
+    [[ message ]]<br/>
+    <span v-bind:title="ads">鼠标悬浮查看提示信息！</span><br/>
+    <span :title="ads">鼠标悬浮查看提示信息！</span><br/>
+    <a v-bind:href="home" target="_blank">戳我有惊喜</a><br/>
+    <a :href="home" target="_blank">戳我有惊喜</a><br/>
+
+    <!----------------------------------------------------------------->
+    <h2>v-if</h2>
+    <a href="#" v-if="condition != true">个人中心</a>
+    <a href="#" v-else>登录</a><br/>
+    <!--  v-else要紧跟 v-if后边  -->
+    <div v-if="type === 'A'">
+        A
+    </div>
+    <div v-else-if="type === 'B'">
+        B
+    </div>
+    <div v-else-if="type === 'C'">
+        C
+    </div>
+    <div v-else>
+        Not A/B/C
+    </div>
+
+    <!----------------------------------------------------------------->
+    <h2>v-show</h2>
+    <p v-if="seen" id="if">现在你看到我了</p>
+    <p v-show="seen" id="show">现在你看到我了</p>
+    <!-- 当 seen = false 时 不会渲染if -->
+    <!-- this.document.getElementById('if') -->
+    <!-- this.document.getElementById('show') -->
+
+    <!----------------------------------------------------------------->
+    <h2>v-for</h2>
+    <ol>
+        <li v-for="todo in todos">
+            [[ todo.text ]]
+        </li>
+    </ol>
+    <ol>
+        <li v-for="(todo,index) in todos">
+            [[ todo.text ]]-[[ index ]]
+        </li>
+    </ol>
+    <ol>
+        <li v-for="(k,v) in object">
+            [[ k ]]-----[[ v ]]
+        </li>
+    </ol>
+    <ol>
+        <li v-for="item in items">
+            [[ item.title ]]-----[[ item.author ]]
+        </li>
+    </ol>
+
+    <!----------------------------------------------------------------->
+    <h2>methods</h2>
+    <button v-on:click="counter += 1">add</button>
+    <br/>
+    <button @click="add">add</button>
+    <br/>
+    <button @click="add">add</button>
+    <br/>
+    <button @click="add(2)">add</button>
+    <p>The button above has been clicked [[ counter ]] times.</p>
+
+    <!----------------------------------------------------------------->
+    <h2>model</h2>
+    <table border="1">
+        <tr>
+            <td>用户名</td>
+            <td><input type="text" v-model="username" @blur="checkusername"></td>
+        </tr>
+        <tr>
+            <td>密码</td>
+            <td><input type="password" v-model="password1"></td>
+        </tr>
+        <tr>
+            <td>确认密码</td>
+            <td><input type="password" v-model="password2"></td>
+        </tr>
+        <tr>
+            <td>性别</td>
+            <td>
+                男<input type="radio" name="sex" value="boy" v-model="sex">
+                女 <input type="radio" name="sex" value="girl" v-model="sex"></td>
+        </tr>
+        <tr>
+            <td>爱好</td>
+            <td>
+                足球 <input type="checkbox" name="like" value="足球" v-model="like">
+                篮球 <input type="checkbox" name="like" value="篮球" v-model="like">
+                兵乓球<input type="checkbox" name="like" value="兵乓球" v-model="like">
+            </td>
+        </tr>
+        <tr>
+            <td>所在城市</td>
+            <td>
+                <select name="city" v-model="city">
+                    <option value="北京">北京</option>
+                    <option value="上海">上海</option>
+                    <option value="广州">广州</option>
+                    <option value="深圳">深圳</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>个人简介</td>
+            <td><textarea name="desc" v-model="desc"></textarea></td>
+        </tr>
+    </table>
+    <button @click="register">注册</button>
+
+    <!----------------------------------------------------------------->
+    <h2>todolist</h2>
+    <input type="text" v-model="newItem">
+    <button @click="addTodoList">添加</button>
+    <hr/>
+    <ul>
+        <li v-for="(item,index) in todolist">
+            <a href="javascript:;" v-if="index != 0" @click="upItem(index)">↑</a>
+            <span>[[ item ]]</span>
+            <a href="javascript:;" v-if="index < todolist.length-1" @click="downItem(index)">↓</a>
+            <a href="javascript:;" @click="deleteItem(index)">删除</a>
+        </li>
+    </ul>
+
+    <!----------------------------------------------------------------->
+    <h2>axios</h2>
+    <span>{{ message }}</span> <br>
+    <span>[[ message ]]</span> <br>
+    <a @click="login" href="javascript:;">登录-GET</a> <br/>
+    <a @click="login2" href="javascript:;">登录-GET2</a> <br/>
+    <a @click="login3" href="javascript:;">登录-POST</a> <br/>
+
+    <!----------------------------------------------------------------->
+    <h2>组件</h2>
+    <zujian_all></zujian_all>
+</div>
+</body>
+<script type="text/javascript">
+
+    var zujian_a = {
+        template: '<div>组件a-{{zujian_a_data}}</div>',
+        // 在子组件中通过props属性定义接受值的名称
+        props: ['zujian_a_data']
+    }
+
+    var zujian_b = {
+        template: '<div>组件b <button v-on:click="isupload"> 上传</button> </div>',
+        methods: {
+            isupload: function()
+            {
+                // 子元素上的点击事件成功后，通过 $emit 将事件和数据传递给父组件
+                this.$emit('isListen', 'hello')
+            }
+        }
+    }
+
+    Vue.component(
+        // 全局组件通过 Vue.component注册
+        'zujian_all',
+        {
+            // template指定组件显示的html内容
+            template: '<div>全局组件 [[ zujian_all_data ]] {{ zujian_all_data }} ' +
+                '<zujian_a v-bind:zujian_a_data="zujian_all_data"></zujian_a> ' +
+                '<zujian_b v-on:isListen="isShow"></zujian_b> ' +
+                '</div>',
+            // components 将局部组件注册到全局组件中
+            components: {
+                zujian_a,
+                zujian_b,
+            },
+            data: () => {
+                return {
+                    zujian_all_data: 'hi'
+                }
+            },
+            methods: {
+                isShow: (data) => {
+                    // data参数接受子组件传递的值
+                    alert(data)
+                }
+            }
+        }
+    )
+
+    var app = new Vue({
+        el: '#app',
+        // 分隔符
+        delimiters: ['[[', ']]'],
+        data: {
+            message: 'Hello Vue!',
+            ads: '页面加载于' + new Date().toLocaleDateString(),
+            home: 'https://www.baidu.com',
+            condition: true,
+            type: 'D',
+            seen: false,
+            todos: [
+                {text: '学习 JavaScript'},
+                {text: '学习 Vue'},
+                {text: '整个牛X项目'}
+            ],
+            object: {
+                title: 'How to do lists in Vue',
+                author: 'Jane Doe',
+                publishedAt: '2016-04-10'
+            },
+            items: [
+                {
+                    title: 'Vue',
+                    author: 'Jane Doe',
+                    publishedAt: '2016-04-10'
+                },
+                {
+                    title: 'python',
+                    author: 'Ricky',
+                    publishedAt: '2019-04-10'
+                },
+                {
+                    title: 'itcast',
+                    author: 'itcast',
+                    publishedAt: '2006-05-08'
+                }
+            ],
+            counter: 0,
+            username: '',
+            password1: '',
+            password2: '',
+            sex: '',
+            like: [],
+            city: '',
+            desc: '',
+            todolist: ['学习Vue', '学习Django基础', '学习Django前台'],
+            newItem: '',
+        },
+        methods: {
+            add: function () {
+                this.counter += 1
+                alert(this.counter)
+            },
+            add: function (number) {
+                this.counter += number
+                alert(this.counter)
+            },
+            register: function () {
+                alert(this.username + this.password1 + this.password2 + this.sex + this.like + this.city + this.desc)
+            },
+            checkusername: function () {
+                alert(this.username);
+            },
+            addTodoList: function () {
+                this.todolist.push(this.newItem);
+                this.newItem = '';
+            },
+            deleteItem: function (index) {
+                this.todolist.splice(index, 1)
+            },
+            upItem: function (index) {
+                current = this.todolist[index]
+                this.todolist.splice(index, 1)
+                this.todolist.splice(index - 1, 0, current)
+            },
+            downItem: function (index) {
+                current = this.todolist[index]
+                this.todolist.splice(index, 1)
+                this.todolist.splice(index + 1, 0, current)
+            },
+            login: () => {
+                let url = 'http://127.0.0.1:8000/login/?username=admin&password=123'
+                axios.get(url).then(response => {
+                    console.log(response.data.code)
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+            login2: () => {
+                let url = 'http://127.0.0.1:8000/login/';
+                axios.get(url, {
+                    params: {
+                        "username": "admin",
+                        "password": "123"
+                    }
+                }).then(response => {
+                    if (response.data.code == '200') {
+                        this.message = response.data.info.username;
+                    } else if (response.data.code == '400') {
+                        this.message = response.data.msg;
+                    }
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+            login3: () => {
+                let url = 'http://127.0.0.1:8000/login/';
+                axios.post(url, {
+                    "username": "admin",
+                    "password": "123"
+                }).then(response => {
+                    if (response.data.code == '200') {
+                        this.message = response.data.info.username;
+                    } else if (response.data.code == '400') {
+                        this.message = response.data.msg;
+                    }
+                }).catch(error => {
+                    console.log(error)
+                })
+            }
+        }
+    })
+
+
+</script>
+</html>
