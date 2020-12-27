@@ -10,10 +10,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
+sys.path.insert(0, os.path.join(BASE_DIR, 'utils'))
+# print(sys.path)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -37,8 +41,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # 用户模块
-    'meiduo_mall.apps.users',
+    # 'meiduo_mall.apps.users',
+    'users',
 ]
+
+# 指定自定义用户模型类，语法：’子应用.用户模型类‘
+AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -56,17 +64,17 @@ TEMPLATES = [
     {
         # jinja2模板引擎
         'BACKEND': 'django.template.backends.jinja2.Jinja2',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
+            # 补充Jinja2模板引擎环境
+            'environment': 'meiduo_mall.utils.jinja2_env.jinja2_environment',
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
-            # 补充Jinja2模板引擎环境
-            'environment': 'meiduo_mall.utils.jinja2_env.jinja2_environment'
         },
     },
     {
@@ -92,7 +100,7 @@ WSGI_APPLICATION = 'meiduo_mall.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': 'localhost',
+        'HOST': '127.0.0.1',
         'PORT': 3306,
         'USER': 'root',
         'PASSWORD': 'root',

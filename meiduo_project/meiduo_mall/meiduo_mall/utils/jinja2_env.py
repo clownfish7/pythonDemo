@@ -10,16 +10,22 @@
   @Version  : 1.0
 """
 
-from jinja2 import Environment
-from django.contrib.staticfiles.storage import staticfiles_storage
+from django.templatetags.static import static
 from django.urls import reverse
+
+from jinja2 import Environment
 
 
 def jinja2_environment(**options):
+    """jinja2环境"""
+    # 创建环境对象
     env = Environment(**options)
+    # 自定义语法：{{ static('静态文件相对路径') }} {{ url('路由的m命名空间') }}
     env.globals.update({
-        'static': staticfiles_storage.url,
-        'url': reverse
+        # 获取静态文件的前缀
+        'static': static,
+        # 反向解析
+        'url': reverse,
     })
     return env
 
