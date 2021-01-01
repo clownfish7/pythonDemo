@@ -4,6 +4,7 @@ from django.views import View
 from django import http
 from django.db import DatabaseError
 from django.contrib.auth import login
+from django_redis import get_redis_connection
 import re
 
 # Create your views here.
@@ -40,6 +41,7 @@ class RegisterView(View):
         password2 = request.POST.get('password2')
         mobile = request.POST.get('mobile')
         allow = request.POST.get('allow')
+        sms_code_client = request.POST.get('sms_code')
 
         # 判断参数是否齐全
         if not all([username, password, password2, mobile, allow]):
@@ -59,6 +61,11 @@ class RegisterView(View):
         # 判断是否勾选用户协议
         if allow != 'on':
             return http.HttpResponseForbidden('请勾选用户协议')
+        # 短信验证码校验
+        redis_conn = get_redis_connection('verifications')
+        sms_code_server = redis_conn.get('sms_%s' % mobile)
+        if sms_code_server is None or sms_code_server.decode() != sms_code_client:
+            return render(request, 'register.html', {'sms_code_message': '验证码错误'})
 
         # 保存注册数据
         try:

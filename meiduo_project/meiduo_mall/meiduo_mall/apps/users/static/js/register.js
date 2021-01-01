@@ -21,11 +21,13 @@ let app = new Vue({
         error_mobile: false,
         error_allow: false,
         error_image_code: false,
+        error_sms_code: false,
 
         // error_message
         error_username_message: '',
         error_mobile_message: '',
         error_image_code_message: '',
+        error_sms_code_message: '',
 
         image_code_url: '',
         uuid: '',
@@ -146,6 +148,14 @@ let app = new Vue({
         check_allow: function () {
             this.error_allow = !this.allow;
         },
+        check_sms_code() {
+            if (this.sms_code.length !== 6) {
+                this.error_sms_code_message = '请填写短信验证码';
+                this.error_sms_code = true;
+            } else {
+                this.error_sms_code = false;
+            }
+        },
         // 监听表单提交事件
         on_submit: function () {
             this.check_username();
@@ -153,11 +163,13 @@ let app = new Vue({
             this.check_password2();
             this.check_mobile();
             this.check_allow();
+            this.check_sms_code();
             if (this.error_username === true ||
                 this.error_password === true ||
                 this.error_password2 === true ||
                 this.error_mobile === true ||
-                this.error_allow === true) {
+                this.error_allow === true ||
+                this.error_sms_code === true) {
                 // 禁用表单的提交
                 window.event.returnValue = false;
             }
