@@ -11,6 +11,8 @@ let app = new Vue({
         password2: '',
         mobile: '',
         allow: '',
+        image_code: '',
+        sms_send_flag: false,
 
         // v-show
         error_username: false,
@@ -18,13 +20,70 @@ let app = new Vue({
         error_password2: false,
         error_mobile: false,
         error_allow: false,
+        error_image_code: false,
 
         // error_message
         error_username_message: '',
         error_mobile_message: '',
+        error_image_code_message: '',
+
+        image_code_url: '',
+        uuid: '',
+        sms_code_tip: '获取短信验证码',
+    },
+    mounted() {
+        // 页面加载完调用
+        this.generate_image_code()
     },
     methods: {
         // 定义和实现事件方法
+
+        // 生成图形验证码
+        generate_image_code() {
+            this.uuid = generateUUID()
+            this.image_code_url = 'verifications/image_codes/' + this.uuid + '/'
+        },
+
+        // 短信验证
+        send_sms_code() {
+            if (this.sms_send_flag) {
+                return
+            }
+            this.check_image_code()
+            this.check_mobile()
+            if (this.error_mobile || this.error_image_code) {
+                return;
+            }
+            this.sms_send_flag = true
+            let url = 'verifications/sms_codes/' + this.mobile
+                + '?image_code=' + this.image_code
+                + '&uuid=' + this.uuid;
+            axios.get(url, {
+                responseType: 'json'
+            })
+                .then(resp => {
+                    if (resp.data.code === '0') {
+                        let num = 60
+                        let interval = setInterval(() => {
+                            if (num === 1) {
+                                clearInterval(interval)
+                                this.sms_code_tip = '获取短信验证码'
+                                this.generate_image_code()
+                                this.sms_send_flag = false
+                            }
+                            num -= 1;
+                            this.sms_code_tip = num + 's'
+                        }, 1000);
+                    } else {
+                        this.sms_code_tip = resp.data.message
+                        this.sms_send_flag = false
+                    }
+                })
+                .catch(error => {
+                    console.error(error.response)
+                    this.sms_send_flag = false
+                })
+        },
 
         // 校验用户名
         check_username: function () {
@@ -34,6 +93,25 @@ let app = new Vue({
             } else {
                 this.error_username_message = '请输入5-20个字符的用户名';
                 this.error_username = true;
+            }
+            if (!this.error_username) {
+                let url = '/users/' + this.username + '/count/'
+                axios.get(url, {
+                    responseType: 'json'
+                })
+                    .then(response => {
+                        if (response.data.data.count === 1) {
+                            // username exists
+                            this.error_username = true
+                            this.error_username_message = '用户名已存在'
+                        } else {
+                            // username not exists
+                            this.error_username = false
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error.response)
+                    })
             }
         },
         // 校验密码
@@ -53,6 +131,15 @@ let app = new Vue({
             } else {
                 this.error_mobile_message = '您输入的手机号格式不正确';
                 this.error_mobile = true;
+            }
+        },
+        // 校验图形验证码
+        check_image_code: function () {
+            if (this.image_code.length !== 4) {
+                this.error_image_code_message = '请输入图形验证码';
+                this.error_image_code = true;
+            } else {
+                this.error_image_code = false;
             }
         },
         // 校验是否勾选协议

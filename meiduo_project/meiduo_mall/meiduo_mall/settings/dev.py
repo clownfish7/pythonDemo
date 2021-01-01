@@ -42,7 +42,12 @@ INSTALLED_APPS = [
 
     # 用户模块
     # 'meiduo_mall.apps.users',
-    'users',
+    'users.apps.UsersConfig',
+    # 'users',
+    # 首页广告模块
+    'contents',
+    # 验证模块
+    'verifications',
 ]
 
 # 指定自定义用户模型类，语法：’子应用.用户模型类‘
@@ -100,10 +105,10 @@ WSGI_APPLICATION = 'meiduo_mall.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': '127.0.0.1',
+        'HOST': '47.97.8.7',
         'PORT': 3306,
-        'USER': 'root',
-        'PASSWORD': 'root',
+        'USER': 'dev',
+        'PASSWORD': 'productdev123',
         'NAME': 'monica',
     }
 }
@@ -111,18 +116,26 @@ DATABASES = {
 CACHES = {
     "default": {  # 默认
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://[:password]@localhost:6379/0",
+        "LOCATION": "redis://:ps@123@47.97.8.7:6379/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PASSWORD": "password"
+            "PASSWORD": "ps@123"
         }
     },
     "session": {  # session
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://[:password]@localhost:6379/1",
+        "LOCATION": "redis://:ps@123@47.97.8.7:6379/15",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PASSWORD": "password"
+            "PASSWORD": "ps@123"
+        }
+    },
+    "verifications": {  # verifications
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://:ps@123@47.97.8.7:6379/14",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD": "ps@123"
         }
     },
 }

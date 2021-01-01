@@ -1,12 +1,30 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.views import View
 from django import http
+from django.db import DatabaseError
+from django.contrib.auth import login
 import re
 
 # Create your views here.
-from pymysql import DatabaseError
+from users.models import User
+from meiduo_mall.utils.response_code import RETCODE, err_msg
 
-from meiduo_project.meiduo_mall.meiduo_mall.apps.users.models import User
+
+class UsernameCountView(View):
+    """用户名检测"""
+
+    def get(self, request, username):
+        """
+        :param username: 用户名
+        :return: JSON
+        """
+        count = User.objects.filter(username=username).count()
+        return http.JsonResponse({
+            'code': RETCODE.OK,
+            'message': err_msg[RETCODE.OK],
+            'data': {'count': count},
+        })
 
 
 class RegisterView(View):
@@ -44,12 +62,14 @@ class RegisterView(View):
 
         # 保存注册数据
         try:
-            User.objects.create_user(username=username, password=password, mobile=mobile)
+            user = User.objects.create_user(username=username, password=password, mobile=mobile)
         except DatabaseError:
             return render(request, 'register.html', {'register_errmsg': '注册失败'})
 
+        login(request, user)
         # 响应注册结果
-        return http.HttpResponse('注册成功')
+        # return http.HttpResponse('注册成功')
+        return redirect(reverse('contents:index'))
 
     def delete(self):
         pass
