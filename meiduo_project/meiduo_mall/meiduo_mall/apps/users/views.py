@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.views import View
 from django import http
 from django.db import DatabaseError
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django_redis import get_redis_connection
 import re
 
@@ -80,3 +80,43 @@ class RegisterView(View):
 
     def delete(self):
         pass
+
+
+class LoginView(View):
+    """用户登录"""
+
+    def get(self, request):
+        """获取用户登录视图"""
+        return render(request, 'login.html')
+
+    def post(self, requeust):
+        """登录逻辑"""
+        username = requeust.POST.get('username')
+        password = requeust.POST.get('password')
+        remembered = requeust.POST.get('remembered')
+
+        if not all([username, password]):
+            return http.HttpResponseForbidden('缺失参数')
+        if not re.match(r'^[a-zA-Z0-9_-]{5,20}$', username):
+            return http.HttpResponseForbidden('username not allow')
+        if not re.match(r'^[0-9A-Za-z]{8,20}$', password):
+            return http.HttpResponseForbidden('password not allow')
+
+        # 认证用户
+        user = authenticate(username=username, password=password)
+        if user is None:
+            return render(requeust, 'login.html', {'account_errmsg': "账户或密码错误"})
+
+        # 保持状态
+        login(requeust, user)
+
+        # 使用 remembered 确定状态保持周期
+        if remembered != 'on':
+            # 浏览器结束销毁，单位是 second
+            requeust.session.set_expiry(0)
+        else:
+            # 状态保持 2 week 默认两周
+            requeust.session.set_expiry(None)
+
+        # 响应结果重定向到首页
+        return redirect(reverse('contents:index'))
