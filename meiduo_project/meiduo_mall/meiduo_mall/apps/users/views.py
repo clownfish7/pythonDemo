@@ -3,7 +3,8 @@ from django.urls import reverse
 from django.views import View
 from django import http
 from django.db import DatabaseError
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django_redis import get_redis_connection
 import re
 
@@ -76,7 +77,9 @@ class RegisterView(View):
         login(request, user)
         # 响应注册结果
         # return http.HttpResponse('注册成功')
-        return redirect(reverse('contents:index'))
+        response = redirect(reverse('contents:index'))
+        response.set_cookie('username', user.username, max_age=3600 * 24 * 15)
+        return response
 
     def delete(self):
         pass
@@ -119,4 +122,30 @@ class LoginView(View):
             requeust.session.set_expiry(None)
 
         # 响应结果重定向到首页
-        return redirect(reverse('contents:index'))
+        if requeust.GET.get('next'):
+            response = redirect(requeust.GET.get('next'))
+        else:
+            response = redirect(reverse('contents:index'))
+        response.set_cookie('username', user.username, max_age=3600 * 24 * 15)
+        return response
+
+
+class LogoutView(View):
+    """用户退出登录"""
+
+    def get(self, request):
+        """清除session"""
+        logout(request)
+        # clear cookie
+        response = redirect(reverse('contents:index'))
+        response.delete_cookie('username')
+        return response
+
+
+class UserInfoView(LoginRequiredMixin, View):
+    """用户中心"""
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            return render(request, 'user_center_info.html')
+        return redirect('users:login')
