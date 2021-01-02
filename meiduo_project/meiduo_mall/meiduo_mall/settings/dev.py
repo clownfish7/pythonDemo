@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'contents',
     # 验证模块
     'verifications',
+    # 第三方登录模块
+    'oauth',
 ]
 
 # 指定自定义用户模型类，语法：’子应用.用户模型类‘
@@ -224,3 +226,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 # 全局 login url
 LOGIN_URL = '/login/'
+
+# QQ 登录配置
+QQ_CLIENT_ID = '101518219'
+QQ_CLIENT_SECRET = '418d84ebdc7241efb79536886ae95224'
+QQ_REDIRECT_URI = 'http://www.meiduo.site:8000/oauth_callback'

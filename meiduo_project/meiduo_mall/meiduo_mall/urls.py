@@ -15,7 +15,6 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include, re_path
-from .apps.users import views
 from django.views.generic.base import RedirectView
 
 urlpatterns = [
@@ -28,4 +27,6 @@ urlpatterns = [
     re_path(r'^', include('contents.urls', namespace='contents')),
     # verifications
     re_path(r'^', include('verifications.urls')),
+    # oauth
+    re_path(r'^', include('oauth.urls')),
 ]
