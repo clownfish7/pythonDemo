@@ -7,6 +7,8 @@ class User(AbstractUser):
     """自定义用户模型类"""
     # db_column 默认为 key 一样
     mobile = models.CharField(db_column='mobile', max_length=11, unique=True, verbose_name='手机号')
+    # 邮箱激活状态
+    email_active = models.BooleanField(default=False, verbose_name='邮箱验证状态')
 
     class Meta:
         # 自定义表名

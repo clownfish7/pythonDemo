@@ -146,6 +146,14 @@ class UserInfoView(LoginRequiredMixin, View):
     """用户中心"""
 
     def get(self, request):
-        if request.user.is_authenticated:
-            return render(request, 'user_center_info.html')
-        return redirect('users:login')
+        # if request.user.is_authenticated:
+        #     return render(request, 'user_center_info.html')
+        # return redirect('users:login')
+        # LoginRequiredMixin 判断用户已登录 request.user 就是登录用户对象
+        context = {
+            'username': request.user.username,
+            'mobile': request.user.mobile,
+            'email': request.user.email,
+            'email_active': request.user.email_active,
+        }
+        return render(request, 'user_center_info.html', context)
