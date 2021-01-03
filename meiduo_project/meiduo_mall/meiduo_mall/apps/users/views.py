@@ -6,11 +6,16 @@ from django.db import DatabaseError
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django_redis import get_redis_connection
-import re
+import re, json, logging
 
 # Create your views here.
 from users.models import User
 from meiduo_mall.utils.response_code import RETCODE, err_msg
+from meiduo_mall.utils.views import LoginRequiredJSONMixin
+from celery_tasks.email.tasks import send_verify_email
+from users.utils import generate_verify_email_url, check_verify_email_token
+
+log = logging.getLogger('django')
 
 
 class UsernameCountView(View):
@@ -157,3 +162,44 @@ class UserInfoView(LoginRequiredMixin, View):
             'email_active': request.user.email_active,
         }
         return render(request, 'user_center_info.html', context)
+
+
+class EmailView(LoginRequiredJSONMixin, View):
+    """添加邮箱"""
+
+    def put(self, request):
+        json_dict = json.loads(request.body.decode())
+        email = json_dict.get('email')
+        if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+            return http.HttpResponseForbidden('email error')
+        try:
+            request.user.email = email
+            request.user.save()
+        except Exception as e:
+            log.error(e)
+            return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': err_msg[RETCODE.DBERR]})
+
+        # send email
+        email_verify_url = generate_verify_email_url(request.user)
+        send_verify_email.delay(request.user.email, email_verify_url)
+
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': err_msg[RETCODE.OK]})
+
+
+class VerifyEmailView(View):
+    """验证邮箱"""
+
+    def get(self, request):
+        token = request.GET.get('token')
+        if not token:
+            return http.HttpResponseForbidden('no token')
+        user = check_verify_email_token(token)
+        if not user:
+            return http.HttpResponseBadRequest('unuseful token')
+        try:
+            user.email_active = True
+            user.save()
+        except Exception as e:
+            log.error(e)
+            return http.HttpResponseServerError('email active error')
+        return redirect(reverse('users:info'))

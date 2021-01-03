@@ -13,4 +13,8 @@ urlpatterns = [
     re_path(r'^logout/', views.LogoutView.as_view(), name='logout'),
     # 用户中心
     re_path(r'^info/', views.UserInfoView.as_view(), name='info'),
+    # 添加邮箱
+    re_path(r'^emails/$', views.EmailView.as_view()),
+    # 邮箱验证
+    re_path(r'^emails/verification/$', views.VerifyEmailView.as_view()),
 ]
