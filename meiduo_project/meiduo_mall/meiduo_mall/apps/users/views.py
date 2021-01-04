@@ -203,3 +203,11 @@ class VerifyEmailView(View):
             log.error(e)
             return http.HttpResponseServerError('email active error')
         return redirect(reverse('users:info'))
+
+
+class AddressView(View):
+    """用户收货地址"""
+
+    def get(self, request):
+        """提供收货地址页面"""
+        return render(request, 'user_center_site.html')

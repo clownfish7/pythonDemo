@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'verifications',
     # 第三方登录模块
     'oauth',
+    # 省市区 - 区域模块
+    'areas',
 ]
 
 # 指定自定义用户模型类，语法：’子应用.用户模型类‘
