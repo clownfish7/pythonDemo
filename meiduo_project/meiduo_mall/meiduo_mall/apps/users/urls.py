@@ -19,4 +19,12 @@ urlpatterns = [
     re_path(r'^emails/verification/$', views.VerifyEmailView.as_view()),
     # 用户收货地址
     re_path(r'^addresses/$', views.AddressView.as_view(), name='address'),
+    # 新建用户收货地址
+    re_path(r'^addresses/create/$', views.CreateAddressView.as_view()),
+    # 修改用户收货地址 & 删除
+    re_path(r'^addresses/(?P<address_id>\d+)/$', views.UpdateDestroyAddressView.as_view()),
+    # 设置用户默认地址
+    re_path(r'^addresses/(?P<address_id>\d+)/default/$', views.DefaultAddressView.as_view()),
+    # 修改地址标题
+    re_path(r'^addresses/(?P<address_id>\d+)/title/$', views.UpdateTitleAddressView.as_view()),
 ]
