@@ -27,4 +27,6 @@ urlpatterns = [
     re_path(r'^addresses/(?P<address_id>\d+)/default/$', views.DefaultAddressView.as_view()),
     # 修改地址标题
     re_path(r'^addresses/(?P<address_id>\d+)/title/$', views.UpdateTitleAddressView.as_view()),
+    # 修改密码
+    re_path(r'^pass/$', views.ChangePasswordView.as_view(), name='pass'),
 ]
