@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'oauth',
     # 省市区 - 区域模块
     'areas',
+    # 商品模块
+    'goods',
 ]
 
 # 指定自定义用户模型类，语法：’子应用.用户模型类‘
@@ -243,3 +245,9 @@ EMAIL_HOST_PASSWORD = 'password'  # 邮箱授权时获得的密码，非注册�
 EMAIL_FROM = '美多商城<email_account>'  # 发件人抬头
 # 邮箱验证链接
 EMAIL_VERIFY_URL = 'http://www.meiduo.site:8000/emails/verification/'
+
+# fastdfs
+# 指定自定义的Django文件存储类
+DEFAULT_FILE_STORAGE = 'meiduo_mall.utils.fastdfs.fdfs_storage.FastDFSStorage'
+# 指定url
+FDFS_BASE_URL = 'http://47.97.8.7:8888/'

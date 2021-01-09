@@ -31,4 +31,6 @@ urlpatterns = [
     re_path(r'^', include('oauth.urls')),
     # areas
     re_path(r'^', include('areas.urls')),
+    # goods
+    re_path(r'^', include('goods.urls', namespace='goods')),
 ]
