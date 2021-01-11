@@ -9,6 +9,7 @@ from django_redis import get_redis_connection
 import re, json, logging
 
 # Create your views here.
+from goods.models import SKU
 from users import constants
 from users.models import User, Address
 from meiduo_mall.utils.response_code import RETCODE, err_msg
@@ -484,3 +485,54 @@ class ChangePasswordView(LoginRequiredJSONMixin, View):
 
         # 响应密码修改结果：重定向到登录界面
         return response
+
+
+class UserBrowseHistory(LoginRequiredJSONMixin, View):
+    """用户浏览记录"""
+
+    def get(self, request):
+        """查询用户商品浏览记录"""
+        # 获取登录用户信息
+        user = request.user
+        # 创建连接到redis对象
+        redis_conn = get_redis_connection('history')
+        # 取出列表数据（核心代码）
+        sku_ids = redis_conn.lrange('history_%s' % user.id, 0, -1)  # (0, 4)
+        # 将模型转字典
+        skus = []
+        for sku_id in sku_ids:
+            sku = SKU.objects.get(id=sku_id)
+            skus.append({
+                'id': sku.id,
+                'name': sku.name,
+                'price': sku.price,
+                'default_image_url': sku.default_image.url
+            })
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK', 'skus': skus})
+
+    def post(self, request):
+        """保存用户商品浏览记录"""
+        # 接收参数
+        json_str = request.body.decode()
+        json_dict = json.loads(json_str)
+        sku_id = json_dict.get('sku_id')
+        # 校验参数
+        try:
+            SKU.objects.get(id=sku_id)
+        except SKU.DoesNotExist:
+            return http.HttpResponseForbidden('参数sku_id错误')
+        # 保存sku_id到redis
+        redis_conn = get_redis_connection('history')
+        user = request.user
+        pl = redis_conn.pipeline()
+        # 先去重
+        pl.lrem('history_%s' % user.id, 0, sku_id)
+        # 再保存：最近浏览的商品在最前面
+        pl.lpush('history_%s' % user.id, sku_id)
+        # 最后截取
+        pl.ltrim('history_%s' % user.id, 0, 4)
+        # 执行
+        pl.execute()
+
+        # 响应结果
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK'})
